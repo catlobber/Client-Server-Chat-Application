@@ -18,6 +18,7 @@ def currenttime():
 
 
 # Receive messages from the server
+# Messages come with different types (i.e SERVER/MSG)
 def receive_message(client_socket):
     global running
     while running:

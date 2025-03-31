@@ -43,8 +43,10 @@ while True:
          userlist.update({user['data'].decode('utf-8'): client_socket})
          print(f"Accepted connection from {client_address}, username: {user['data'].decode('utf-8')}")
 
-
-       
+         #welcomemessage = f"Welcome to #Python. Currently Connected Users: {','.join(userlist.keys())}"
+         #welcomemessageheader = f"{len(welcomemessage):<{headersize}}".encode('utf-8')
+         #client_socket.send(welcomemessageheader + welcomemessage.encode('utf-8'))
+         #Make this send message types too
     else:
         message = recieve_message(connected)
 
