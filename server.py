@@ -15,6 +15,7 @@ welcomingsocket = createwelcomingsocket(12345)
 socketlist = [welcomingsocket]
 clients = {}
 headersize = 4
+userlist = {}
 
 def recieve_message(client_socket):
     try:
@@ -39,7 +40,11 @@ while True:
              continue
          socketlist.append(client_socket)
          clients[client_socket] = user
-         print(f"Accepted connection from {client_address}, username: {user}")
+         userlist.update({user['data'].decode('utf-8'): client_socket})
+         print(f"Accepted connection from {client_address}, username: {user['data'].decode('utf-8')}")
+
+
+       
     else:
         message = recieve_message(connected)
 
@@ -52,7 +57,9 @@ while True:
 
         user = clients[connected]
         print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+
         for client_socket in clients:
+    
             if client_socket != connected:
                 client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
 

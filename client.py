@@ -1,19 +1,43 @@
 import socket
 import threading
+import time
 
 HOST = ''  # Server address
 PORT = 12345
 headersize = 4
 running = True #Set variable so we can stop recieve message across all threads
+
+
+def currenttime():
+    epoch = time.time()
+    local = time.localtime(epoch)
+    hour = local.tm_hour
+    minute = local.tm_min
+    second = local.tm_sec
+    return [hour,minute,second]
+
+
 # Receive messages from the server
 def receive_message(client_socket):
     global running
     while running:
         try:
-            msg = client_socket.recv(headersize).decode()
-            if msg == '.exit':
-                print("Client disconnected successfully")
+            username_header = client_socket.recv(headersize)
+            if not len(username_header):
+                print('Connection closed by server.')
+                running = False
                 break
+            username_length = int(username_header.decode('utf-8').strip())
+            username = client_socket.recv(username_length).decode('utf-8')
+            
+            
+            message_header = client_socket.recv(headersize)
+            if not message_header:
+                break
+            message_length = int(message_header.decode('utf-8').strip())
+            message = client_socket.recv(message_length).decode('utf-8')
+            t = currenttime()
+            print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <@{username}> {message}")
         except Exception as e:
             print(f'Error handling message from server: {e}')
             break
@@ -27,7 +51,11 @@ def client() -> None:
         threading.Thread(target=receive_message, args=[socket_instance]).start()
 
         print(f'Client has connected.')
-        print("Please input your username.")
+        
+        message = input("Please enter your username: ")
+        message_header = f"{len(message):<{headersize}}".encode('utf-8')
+        socket_instance.send(message_header + message.encode())
+        
         # read the user until the .exit prompt
         while True:
             message = input()
