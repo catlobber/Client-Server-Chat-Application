@@ -57,15 +57,15 @@ while True:
           client_socket.send(servernameheader + servername.encode('utf-8') + currentuserheader + currentusers.encode('utf-8'))
          #here would be if a client talks to another
     else:
-        message = recieve_message(connected) #recieve message from client
-        user = clients[connected] #get the client's user
+        message = recieve_message(pinged) #recieve message from client
+        user = clients[pinged] #get the client's user
 
         if message is False or message['data'].decode('utf-8') == '.exit': #if .exit is recieved, close the connection, remove them from the socket and user lists.
-            print("Closed connection from: {}".format(clients[connected]['data'].decode('utf-8')))
-            socketlist.remove(connected)
+            print("Closed connection from: {}".format(clients[pinged]['data'].decode('utf-8')))
+            socketlist.remove(pinged)
             del userlist[user["data"].decode("utf-8")]
-            connected.close()
-            del clients[connected]
+            pinged.close()
+            del clients[pinged]
             continue
 
         print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
