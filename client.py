@@ -25,7 +25,7 @@ def receive_message(client_socket):
     while running:
         try:
             username_header = client_socket.recv(headersize)
-            if not len(username_header):
+            if not username_header:
                 print('Connection closed by server.')
                 running = False
                 break
@@ -59,7 +59,7 @@ def client() -> None:
         socket_instance.send(message_header + message.encode())
         print("Username Accepted. Welcome to #Python!")
         # read the user until the .exit prompt
-        while True:
+        while running:
             message = input()
 
             if message == '.exit':
@@ -68,10 +68,15 @@ def client() -> None:
                 break
             
             # parse message to utf-8 and send message header first because server expects the size to be sent first
-            message_header = f"{len(message):<{headersize}}".encode('utf-8')
-            socket_instance.send(message_header + message.encode())
-            sys.stdout.write("\033[F")
-            sys.stdout.write("\033[K")
+            try:
+             message_header = f"{len(message):<{headersize}}".encode('utf-8')
+             socket_instance.send(message_header + message.encode())
+             sys.stdout.write("\033[F")
+             sys.stdout.write("\033[K")
+            except BrokenPipeError:
+                print(f"Server has closed connection unexpectedly.")
+                running = False
+                socket_instance.close()
 
         running = False #Tell all threads to stop running recieve message loop
         socket_instance.close()
