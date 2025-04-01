@@ -69,7 +69,7 @@ def send_message(socket_instance):
                 running = False
                 socket_instance.close()
 
-    running = False #Tell all threads to stop running recieve message loop
+    running = False # tell all threads to stop running recieve message loop
     socket_instance.close()
     print("Client has been disconnected.")
         
