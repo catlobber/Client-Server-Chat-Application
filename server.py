@@ -19,11 +19,16 @@ userlist = {}
 
 def recieve_message(client_socket):
     try:
+        message_type = client_socket.recv(headersize)
+        if not message_type:
+            return False
+        message_type_length = int(message_type.decode('utf-8').strip())
+        
         message_header = client_socket.recv(headersize)
         if not message_header:
             return False
         message_length = int(message_header.decode('utf-8').strip())
-        return {'header': message_header, 'data': client_socket.recv(message_length)}
+        return {'typeheader': message_type, 'type': client_socket.recv(message_type_length), 'header': message_header, 'data': client_socket.recv(message_length)}
 
     except:
         return False

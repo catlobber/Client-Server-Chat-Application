@@ -24,22 +24,25 @@ def receive_message(client_socket):
     global running
     while running:
         try:
-            username_header = client_socket.recv(headersize)
-            if not len(username_header):
+            message_type_header = client_socket.recv(headersize)
+            message_type_length = int(message_type_header.decode('utf-8').strip())
+            message_type = client_socket.recv(message_type_length).decode('utf-8')
+            if message_type == "MSG":
+             username_header = client_socket.recv(headersize)
+             if not len(username_header):
                 print('Connection closed by server.')
                 running = False
                 break
-            username_length = int(username_header.decode('utf-8').strip())
-            username = client_socket.recv(username_length).decode('utf-8')
+             username_length = int(username_header.decode('utf-8').strip())
+             username = client_socket.recv(username_length).decode('utf-8')
             
-            
-            message_header = client_socket.recv(headersize)
-            if not message_header:
+             message_header = client_socket.recv(headersize)
+             if not message_header:
                 break
-            message_length = int(message_header.decode('utf-8').strip())
-            message = client_socket.recv(message_length).decode('utf-8')
-            t = currenttime()
-            print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <@{username}> {message}")
+             message_length = int(message_header.decode('utf-8').strip())
+             message = client_socket.recv(message_length).decode('utf-8')
+             t = currenttime()
+             return (f"{t[0]:02}:{t[1]:02}:{t[2]:02} <@{username}> {message}")
         except Exception as e:
             print(f'Error handling message from server: {e}')
             break
@@ -55,14 +58,17 @@ def client() -> None:
         print(f'Client has connected.')
         
         message = input("Please enter your username: ")
+        messagetype = "USER"
+        message_type_header = f"{len(messagetype):<{headersize}}".encode('utf-8')
         message_header = f"{len(message):<{headersize}}".encode('utf-8')
-        socket_instance.send(message_header + message.encode())
-        print("Username Accepted. Welcome to #Python!")
+        socket_instance.send(message_type_header + messagetype.encode() + message_header + message.encode())
+        print("Username Accepted.")
         # read the user until the .exit prompt
         while True:
             message = input()
 
             if message == '.exit':
+
                 message_header = f"{len(message):<{headersize}}".encode('utf-8') #Sends the .exit message with correct format
                 socket_instance.send(message_header + message.encode())
                 break
