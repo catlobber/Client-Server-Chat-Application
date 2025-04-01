@@ -24,6 +24,7 @@ def receive_message(client_socket):
     global running
     while running:
         try:
+            client_socket.setblocking(False)
             username_header = client_socket.recv(headersize)
             if not username_header:
                 print('Connection closed by server.')
@@ -39,27 +40,17 @@ def receive_message(client_socket):
             message_length = int(message_header.decode('utf-8').strip())
             message = client_socket.recv(message_length).decode('utf-8')
             t = currenttime()
-            print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <@{username}> {message}")
+            print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <{username}> {message}")
+        except BlockingIOError:
+            continue
         except Exception as e:
             print(f'Error handling message from server: {e}')
             break
 
-def client() -> None:
+def send_message(socket_instance):
     global running
-    try:
-        # instantiate (create) socket and start server connection 
-        socket_instance = socket.socket()
-        socket_instance.connect((HOST, PORT))
-        threading.Thread(target=receive_message, args=[socket_instance]).start()
-
-        print(f'Client has connected.')
+    while running:
         
-        message = input("Please enter your username: ")
-        message_header = f"{len(message):<{headersize}}".encode('utf-8')
-        socket_instance.send(message_header + message.encode())
-        print("Username Accepted. Welcome to #Python!")
-        # read the user until the .exit prompt
-        while running:
             message = input()
 
             if message == '.exit':
@@ -78,10 +69,28 @@ def client() -> None:
                 running = False
                 socket_instance.close()
 
-        running = False #Tell all threads to stop running recieve message loop
-        socket_instance.close()
-        print("Client has been disconnected.")
+    running = False #Tell all threads to stop running recieve message loop
+    socket_instance.close()
+    print("Client has been disconnected.")
         
+
+
+def client() -> None:
+    global running
+    try:
+        # instantiate (create) socket and start server connection 
+        socket_instance = socket.socket()
+        socket_instance.connect((HOST, PORT))
+        threading.Thread(target=receive_message, args=[socket_instance]).start()
+
+        print(f'Client has connected.')
+        
+        message = input("Please enter your username: ")
+        message_header = f"{len(('@'+message)):<{headersize}}".encode('utf-8')
+        socket_instance.send(message_header + ('@'+message).encode())
+        print("Username Accepted. Welcome to #Python!")
+        # read the user until the .exit prompt
+        threading.Thread(target=send_message, args=[socket_instance]).start()
     
     except Exception as e:
         print(f'Error connecting to server: {e}')

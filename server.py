@@ -16,7 +16,8 @@ socketlist = [welcomingsocket]
 clients = {}
 headersize = 4
 userlist = {}
-
+servername = '-!-'
+servernameheader = f"{len(servername):<{headersize}}".encode('utf-8')
 def recieve_message(client_socket):
     try:
         message_header = client_socket.recv(headersize)
@@ -43,9 +44,10 @@ while True:
          userlist.update({user['data'].decode('utf-8'): client_socket})
          print(f"Accepted connection from {client_address}, username: {user['data'].decode('utf-8')}")
 
-         #welcomemessage = f"Welcome to #Python. Currently Connected Users: {','.join(userlist.keys())}"
-         #welcomemessageheader = f"{len(welcomemessage):<{headersize}}".encode('utf-8')
-         #client_socket.send(welcomemessageheader + welcomemessage.encode('utf-8'))
+         welcomemessage = f"Welcome to #Python. Currently Connected Users: {','.join(userlist.keys())}"
+         welcomemessageheader = f"{len(welcomemessage):<{headersize}}".encode('utf-8')
+        
+         client_socket.send(servernameheader + servername.encode('utf-8') + welcomemessageheader + welcomemessage.encode('utf-8'))
          #Make this send message types too
     else:
         message = recieve_message(connected)
