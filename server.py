@@ -36,8 +36,8 @@ servernameheader = f"{len(servername):<{headersize}}".encode('utf-8')
 while True:
  #select.select which allows the handling of several clients simultaneously
  read, _, exceptions = select.select(socketlist, [], socketlist)
- for connected in read: 
-    if connected == welcomingsocket: #once a client connects, the welcoming socket will be notified and will run this if statement
+ for pinged in read: 
+    if pinged == welcomingsocket: #once a client connects, the welcoming socket will be pinged and will run this if statement
          client_socket, client_address = welcomingsocket.accept()
          user = recieve_message(client_socket) #handles the username recieved from client
          if user is False: #if no username then continue
