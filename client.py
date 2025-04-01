@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+import sys
 
 HOST = ''  # Server address
 PORT = 12345
@@ -56,7 +57,7 @@ def client() -> None:
         message = input("Please enter your username: ")
         message_header = f"{len(message):<{headersize}}".encode('utf-8')
         socket_instance.send(message_header + message.encode())
-        
+        print("Username Accepted. Welcome to #Python!")
         # read the user until the .exit prompt
         while True:
             message = input()
@@ -69,6 +70,8 @@ def client() -> None:
             # parse message to utf-8 and send message header first because server expects the size to be sent first
             message_header = f"{len(message):<{headersize}}".encode('utf-8')
             socket_instance.send(message_header + message.encode())
+            sys.stdout.write("\033[F")
+            sys.stdout.write("\033[K")
 
         running = False #Tell all threads to stop running recieve message loop
         socket_instance.close()
