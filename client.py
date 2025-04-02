@@ -88,7 +88,7 @@ def client() -> None:
         message = input("Please enter your username: ")
         message_header = f"{len(('@'+message)):<{headersize}}".encode('utf-8')
         socket_instance.send(message_header + ('@'+message).encode())
-        print("Username Accepted. Welcome to #Python!")
+        print("Username Accepted.") #VALIDATE SERVERSIDE
         # read the user until the .exit prompt
         threading.Thread(target=send_message, args=[socket_instance]).start()
     

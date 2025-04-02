@@ -47,7 +47,7 @@ while True:
          userlist.update({user['data'].decode('utf-8'): client_socket}) #list of users which are currently connected to the server, used mainly for the userlist sent to users
          print(f"Accepted connection from {client_address}, username: {user['data'].decode('utf-8')}")
 
-         welcomemessage = f"Welcome to #Python."
+         welcomemessage = f"Welcome to #General. Your messages are broadcast to all connected users. If you would like to message someone directly, please use /whisper @username."
          welcomemessageheader = f"{len(welcomemessage):<{headersize}}".encode('utf-8')
          client_socket.send(servernameheader + servername.encode('utf-8') + welcomemessageheader + welcomemessage.encode('utf-8'))
          currentusers = f'Currently Connected Users: {', '.join(userlist.keys())}'
@@ -55,7 +55,6 @@ while True:
 
          for client_socket in clients: #every time a client connects, send the connected users a list of all clients connected
           client_socket.send(servernameheader + servername.encode('utf-8') + currentuserheader + currentusers.encode('utf-8'))
-         #here would be if a client talks to another
     else:
         message = recieve_message(pinged) #recieve message from client
         user = clients[pinged] #get the client's user
@@ -70,6 +69,8 @@ while True:
 
         print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
 
+        #for a message that starts with an @, remember who wrote and then write to the other guy
+        #also tell everyone who disconnected after disconnecting
         for client_socket in clients:
             client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
 
