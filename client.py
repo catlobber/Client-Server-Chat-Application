@@ -2,11 +2,13 @@ import socket
 import threading
 import time
 import sys
+import re
 
 HOST = ''  # Server address
 PORT = 12345
 headersize = 4
 running = True #Set variable so we can stop recieve message across all threads
+message_history = [] # store received messages
 
 
 def currenttime():
@@ -21,7 +23,7 @@ def currenttime():
 # Receive messages from the server
 # Messages come with different types (i.e SERVER/MSG)
 def receive_message(client_socket):
-    global running
+    global running, message_history
     while running:
         try:
             client_socket.setblocking(False)
@@ -42,10 +44,13 @@ def receive_message(client_socket):
 
             if username == '-!-':
                 t = currenttime()
-                print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <{username}> {message}")
+                formatted_message = (f"{t[0]:02}:{t[1]:02}:{t[2]:02} <{username}> {message}")
             else:
                 t = currenttime()
-                print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <@{username}> {message}")
+                formatted_message = (f"{t[0]:02}:{t[1]:02}:{t[2]:02} <@{username}> {message}")
+            
+            print(formatted_message)
+            message_history.append(formatted_message) # add message to history
         except BlockingIOError:
             continue
         except Exception as e:
@@ -53,7 +58,7 @@ def receive_message(client_socket):
             break
 
 def send_message(socket_instance):
-    global running
+    global running, message_history
     while running:
         
             message = input()
@@ -62,6 +67,16 @@ def send_message(socket_instance):
                 message_header = f"{len(message):<{headersize}}".encode('utf-8') #Sends the .exit message with correct format
                 socket_instance.send(message_header + message.encode())
                 break
+            elif message.startswith('/search'):
+                search_term = message[8:] # extract search term
+                search_results = [m for m in message_history if re.search(search_term, m, re.IGNORECASE)]
+                if search_results:
+                    print("Search Results: ")
+                    for result in search_results:
+                        print(result)
+                else:
+                    print("No matching messages found. ")
+                continue
             
             # parse message to utf-8 and send message header first because server expects the size to be sent first
             try:
