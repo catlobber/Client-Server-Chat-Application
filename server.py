@@ -54,7 +54,7 @@ while True:
          userlist[generated_username] = client_socket # list of users which are currently connected to the server, used mainly for the userlist sent to users
          print(f"Accepted connection from {client_address}, assigned username: {generated_username}")
          
-         welcomemessage = f"Welcome to #General. Your Assigned username is: {generated_username}. Your messages are broadcast to all connected users. If you would like to message someone directly, please use /whisper @username."
+         welcomemessage = f"Welcome to #General. Your Assigned username is: {generated_username}. Your messages are broadcast to all connected users. If you would like to message someone directly, please use /whisper @username. If you would like to search for a message, please use /search MESSAGE."
          welcomemessageheader = f"{len(welcomemessage):<{headersize}}".encode('utf-8')
          client_socket.send(servernameheader + servername.encode('utf-8') + welcomemessageheader + welcomemessage.encode('utf-8'))
          currentusers = f'Currently Connected Users: {', '.join(userlist.keys())}'
