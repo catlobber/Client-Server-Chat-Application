@@ -86,7 +86,7 @@ while True:
             for client_socket in clients:
                 #go through clients, checking if they match the /whisper @id
                 if f"/whisper @{clients[client_socket]['data'].decode("utf-8")}" == f'{usermessageparts[0]} {usermessageparts[1]}':
-                    #if they do then make sure the user's message has (WHISPER) attached and send it to appropriate user. Also update found variable.
+                    #if they do then make sure the user's message has (WHISPER) attached and send it to appropriate user. Also update found variable. (add function to make sure the @'s aren't the same)
                     found = 1
                     usermessage = ("(WHISPER)" + ((re.split(r"^/whisper @\d{2}[a-zA-Z]{3}", usermessage))[1]))
                     usermessageheader =  f"{len(usermessage):<{headersize}}".encode('utf-8')
