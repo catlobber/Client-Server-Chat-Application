@@ -76,17 +76,28 @@ while True:
 
         print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
 
-        #for a message that starts with an @, remember who wrote and then write to the other guy
-        #also tell everyone who disconnected after disconnecting
+        #Message handling
         usermessage = message['data'].decode('utf-8')
+        found = 0
+        #If message starts with whisper then handle appropriately
         if re.search("^/whisper", usermessage):
+            #split the user's message into individual parts (i.e '/whisper', '@id', 'Message')
             usermessageparts = re.split(r"\s",usermessage)
             for client_socket in clients:
+                #go through clients, checking if they match the /whisper @id
                 if f"/whisper @{clients[client_socket]['data'].decode("utf-8")}" == f'{usermessageparts[0]} {usermessageparts[1]}':
-                    print('hi')
+                    #if they do then make sure the user's message has (WHISPER) attached and send it to appropriate user. Also update found variable.
+                    found = 1
                     usermessage = ("(WHISPER)" + ((re.split(r"^/whisper @\d{2}[a-zA-Z]{3}", usermessage))[1]))
                     usermessageheader =  f"{len(usermessage):<{headersize}}".encode('utf-8')
                     client_socket.send(user['header'] + user['data'] + usermessageheader + usermessage.encode('utf-8'))
+                    break
+            #else tell the sender that there was a problem in sending the message
+            if found == 0:
+                noclientfoundmsg = "There was a problem in finding the user. Make sure that the user exists."
+                noclientfoundmsgheader = f"{len(noclientfoundmsg):<{headersize}}".encode('utf-8')
+                userlist[user["data"].decode("utf-8")].send(servernameheader + servername.encode('utf-8') + noclientfoundmsgheader + noclientfoundmsg.encode('utf-8'))
+        #If message doesn't start with any command then just send it to everyone
         else:
             for client_socket in clients:
              client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
