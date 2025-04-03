@@ -39,8 +39,14 @@ def receive_message(client_socket):
                 break
             message_length = int(message_header.decode('utf-8').strip())
             message = client_socket.recv(message_length).decode('utf-8')
-            t = currenttime()
-            print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <{username}> {message}")
+
+            if username == '-!-':
+                print(f'\n{message}')
+            else:
+                t = currenttime()
+                print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <{username}> {message}")
+            
+            print("Enter command: ", end='', flush = True)
         except BlockingIOError:
             continue
         except Exception as e:
@@ -51,7 +57,7 @@ def send_message(socket_instance):
     global running
     while running:
         
-            message = input()
+            message = input("Enter command: ")
 
             if message == '.exit':
                 message_header = f"{len(message):<{headersize}}".encode('utf-8') #Sends the .exit message with correct format
@@ -72,8 +78,6 @@ def send_message(socket_instance):
     running = False # tell all threads to stop running recieve message loop
     socket_instance.close()
     print("Client has been disconnected.")
-        
-
 
 def client() -> None:
     global running
@@ -83,12 +87,8 @@ def client() -> None:
         socket_instance.connect((HOST, PORT))
         threading.Thread(target=receive_message, args=[socket_instance]).start()
 
-        print(f'Client has connected.')
-        
-        message = input("Please enter your username: ")
-        message_header = f"{len(('@'+message)):<{headersize}}".encode('utf-8')
-        socket_instance.send(message_header + ('@'+message).encode())
-        print("Username Accepted.") #VALIDATE SERVERSIDE
+        print(f'Client has connected.') 
+       #INSTEAD PRINT OUT THE USERNAME THE SERVER GIVES YOU
         # read the user until the .exit prompt
         threading.Thread(target=send_message, args=[socket_instance]).start()
     
