@@ -91,12 +91,14 @@ while True:
                     usermessage = ("(WHISPER)" + ((re.split(r"^/whisper @\d{2}[a-zA-Z]{3}", usermessage))[1]))
                     usermessageheader =  f"{len(usermessage):<{headersize}}".encode('utf-8')
                     client_socket.send(user['header'] + user['data'] + usermessageheader + usermessage.encode('utf-8'))
+                    userlist[user["data"].decode("utf-8")].send(user['header'] + user['data'] + usermessageheader + usermessage.encode('utf-8'))
                     break
             #else tell the sender that there was a problem in sending the message
             if found == 0:
                 noclientfoundmsg = "There was a problem in finding the user. Make sure that the user exists."
                 noclientfoundmsgheader = f"{len(noclientfoundmsg):<{headersize}}".encode('utf-8')
                 userlist[user["data"].decode("utf-8")].send(servernameheader + servername.encode('utf-8') + noclientfoundmsgheader + noclientfoundmsg.encode('utf-8'))
+        
         #If message doesn't start with any command then just send it to everyone
         else:
             for client_socket in clients:
