@@ -2,6 +2,7 @@ import socket
 import select
 import random
 import string
+import re
 
 def generate_id() -> str:
     rand_num = ''.join(random.choices(string.digits, k = 2))
@@ -77,7 +78,17 @@ while True:
 
         #for a message that starts with an @, remember who wrote and then write to the other guy
         #also tell everyone who disconnected after disconnecting
-        for client_socket in clients:
-            client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
+        usermessage = message['data'].decode('utf-8')
+        if re.search("^/whisper", usermessage):
+            usermessageparts = re.split(r"\s",usermessage)
+            for client_socket in clients:
+                if f"/whisper @{clients[client_socket]['data'].decode("utf-8")}" == f'{usermessageparts[0]} {usermessageparts[1]}':
+                    print('hi')
+                    usermessage = ("(WHISPER)" + ((re.split(r"^/whisper @\d{2}[a-zA-Z]{3}", usermessage))[1]))
+                    usermessageheader =  f"{len(usermessage):<{headersize}}".encode('utf-8')
+                    client_socket.send(user['header'] + user['data'] + usermessageheader + usermessage.encode('utf-8'))
+        else:
+            for client_socket in clients:
+             client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
 
                   
