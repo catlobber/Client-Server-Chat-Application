@@ -41,12 +41,11 @@ def receive_message(client_socket):
             message = client_socket.recv(message_length).decode('utf-8')
 
             if username == '-!-':
-                print(f'\n{message}')
-            else:
                 t = currenttime()
                 print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <{username}> {message}")
-            
-            print("Enter command: ", end='', flush = True)
+            else:
+                t = currenttime()
+                print(f"{t[0]:02}:{t[1]:02}:{t[2]:02} <@{username}> {message}")
         except BlockingIOError:
             continue
         except Exception as e:
@@ -57,7 +56,7 @@ def send_message(socket_instance):
     global running
     while running:
         
-            message = input("Enter command: ")
+            message = input()
 
             if message == '.exit':
                 message_header = f"{len(message):<{headersize}}".encode('utf-8') #Sends the .exit message with correct format
