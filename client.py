@@ -69,7 +69,17 @@ def send_message(socket_instance):
                 break
             elif message.startswith('/search'):
                 search_term = message[8:] # extract search term
-                search_results = [m for m in message_history if re.search(search_term, m, re.IGNORECASE)]
+                include_whispers = False
+                if search_term.startswith("/whisper "):
+                    include_whispers = True
+                    search_term = search_term[len("/whisper "):].strip() # remove /whipser and any whitespace
+                search_results = []
+                if include_whispers:
+                    search_results = [m for m in message_history if re.search(search_term, m, re.IGNORECASE) and "(WHISPER)" in m]
+                else:
+                    search_results = [m for m in message_history if re.search(search_term, m, re.IGNORECASE) and "(WHISPER)" not in m]
+
+
                 if search_results:
                     print("Search Results: ")
                     for result in search_results:
