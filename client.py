@@ -21,14 +21,14 @@ def currenttime():
 
 
 # Receive messages from the server
-# Messages come with different types (i.e SERVER/MSG)
+# Messages come with different types depending on username (i.e. server messages have the name '-!-' and user messages just are a username)
 def receive_message(client_socket):
     global running, message_history
     while running:
         try:
-            client_socket.setblocking(False)
+            client_socket.setblocking(True) #makes it so we don't have to wait for the message to be recieved 
             username_header = client_socket.recv(headersize)
-            if not username_header:
+            if not username_header: #if there is nothing in the header, then the server has disconnected and we close our connection with the server.
                 print('Connection closed by server.')
                 running = False
                 break
@@ -37,12 +37,13 @@ def receive_message(client_socket):
             
             
             message_header = client_socket.recv(headersize)
-            if not message_header:
+            if not message_header: #if there is no message header, then server disconnected and we close our connection
+                running = False
                 break
             message_length = int(message_header.decode('utf-8').strip())
             message = client_socket.recv(message_length).decode('utf-8')
 
-            if username == '-!-':
+            if username == '-!-': #if statement differentiates between client and server messages
                 t = currenttime()
                 formatted_message = (f"{t[0]:02}:{t[1]:02}:{t[2]:02} <{username}> {message}")
             else:

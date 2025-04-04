@@ -54,7 +54,7 @@ while True:
          userlist[generated_username] = client_socket # list of users which are currently connected to the server, used mainly for the userlist sent to users
          print(f"Accepted connection from {client_address}, assigned username: {generated_username}")
          
-         welcomemessage = f"Welcome to #General. Your Assigned username is: {generated_username}. Your messages are broadcast to all connected users. If you would like to message someone directly, please use /whisper @username. If you would like to search for a message, please use /search MESSAGE."
+         welcomemessage = f"Welcome to #General. Your Assigned username is: {generated_username}. Your messages are broadcast to all connected users. If you would like to message someone directly, please use /whisper @username. If you would like to search for a message, please use /search MESSAGE. Remember, never share your personal information online!"
          welcomemessageheader = f"{len(welcomemessage):<{headersize}}".encode('utf-8')
          client_socket.send(servernameheader + servername.encode('utf-8') + welcomemessageheader + welcomemessage.encode('utf-8'))
          currentusers = f'Currently Connected Users: {', '.join(userlist.keys())}'
@@ -74,7 +74,7 @@ while True:
             del clients[pinged]
             continue
 
-        print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+        print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}') #user[data] is username, message[data] is their message
 
         #Message handling
         usermessage = message['data'].decode('utf-8')
@@ -84,9 +84,9 @@ while True:
             #split the user's message into individual parts (i.e '/whisper', '@id', 'Message')
             usermessageparts = re.split(r"\s",usermessage)
             for client_socket in clients:
-                #go through clients, checking if they match the /whisper @id
-                if f"/whisper @{clients[client_socket]['data'].decode("utf-8")}" == f'{usermessageparts[0]} {usermessageparts[1]}':
-                    #if they do then make sure the user's message has (WHISPER) attached and send it to appropriate user. Also update found variable. (add function to make sure the @'s aren't the same)
+                #go through clients, checking if they match the /whisper @id and that they aren't whispering to themselves
+                if f"/whisper @{clients[client_socket]['data'].decode("utf-8")}" == f'{usermessageparts[0]} {usermessageparts[1]}' and usermessageparts[1] != f'@{user["data"].decode("utf-8")}':
+                    #if they do then make sure the user's message has (WHISPER) attached and send it to appropriate user. Also update found variable. 
                     found = 1
                     usermessage = ("(WHISPER)" + ((re.split(r"^/whisper @\d{2}[a-zA-Z]{3}", usermessage))[1]))
                     usermessageheader =  f"{len(usermessage):<{headersize}}".encode('utf-8')
@@ -95,7 +95,7 @@ while True:
                     break
             #else tell the sender that there was a problem in sending the message
             if found == 0:
-                noclientfoundmsg = "There was a problem in finding the user. Make sure that the user exists."
+                noclientfoundmsg = "There was a problem in finding the user. Make sure that the user exists or that user isn't yourself."
                 noclientfoundmsgheader = f"{len(noclientfoundmsg):<{headersize}}".encode('utf-8')
                 userlist[user["data"].decode("utf-8")].send(servernameheader + servername.encode('utf-8') + noclientfoundmsgheader + noclientfoundmsg.encode('utf-8'))
         
