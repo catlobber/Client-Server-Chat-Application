@@ -54,7 +54,7 @@ while True:
          userlist[generated_username] = client_socket # list of users which are currently connected to the server, used mainly for the userlist sent to users
          print(f"Accepted connection from {client_address}, assigned username: {generated_username}")
          
-         welcomemessage = f"Welcome to #General. Your Assigned username is: {generated_username}. Your messages are broadcast to all connected users. If you would like to message someone directly, please use /whisper @username. If you would like to search for a message, please use /search MESSAGE. Remember, never share your personal information online!"
+         welcomemessage = f"Welcome to #General. Your assigned username is: {generated_username}. Your messages are broadcast to all connected users. If you would like a list of commands, use /help. Remember, never share your personal information online!"
          welcomemessageheader = f"{len(welcomemessage):<{headersize}}".encode('utf-8')
          client_socket.send(servernameheader + servername.encode('utf-8') + welcomemessageheader + welcomemessage.encode('utf-8'))
          currentusers = f'Currently Connected Users: {', '.join(userlist.keys())}'
@@ -84,6 +84,8 @@ while True:
             #split the user's message into individual parts (i.e '/whisper', '@id', 'Message')
             usermessageparts = re.split(r"\s",usermessage)
             for client_socket in clients:
+                if len(usermessageparts) == 1:
+                    break
                 #go through clients, checking if they match the /whisper @id and that they aren't whispering to themselves
                 if f"/whisper @{clients[client_socket]['data'].decode("utf-8")}" == f'{usermessageparts[0]} {usermessageparts[1]}' and usermessageparts[1] != f'@{user["data"].decode("utf-8")}':
                     #if they do then make sure the user's message has (WHISPER) attached and send it to appropriate user. Also update found variable. 
@@ -98,7 +100,10 @@ while True:
                 noclientfoundmsg = "There was a problem in finding the user. Make sure that the user exists or that user isn't yourself."
                 noclientfoundmsgheader = f"{len(noclientfoundmsg):<{headersize}}".encode('utf-8')
                 userlist[user["data"].decode("utf-8")].send(servernameheader + servername.encode('utf-8') + noclientfoundmsgheader + noclientfoundmsg.encode('utf-8'))
-        
+        elif re.search("/help", usermessage): #if message is just /help then display help message
+            helpmessage = "/whisper @USERNAME = Directly message a connected user. Does not work on yourself or those who are offline.\n/search (/whisper) MESSAGE = Search for any message that has been sent by anyone. If whispered, use the optional /whisper argument. Whispered messages cannot be accessed by those who weren't messaged."
+            helpmessageheader = f"{len(helpmessage):<{headersize}}".encode('utf-8')
+            userlist[user["data"].decode("utf-8")].send(servernameheader + servername.encode('utf-8') + helpmessageheader + helpmessage.encode('utf-8'))
         #If message doesn't start with any command then just send it to everyone
         else:
             for client_socket in clients:
